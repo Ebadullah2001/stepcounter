@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:kadamcounter/goal.dart';
 import 'package:kadamcounter/widget/imageContainer.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:percent_indicator/linear_percent_indicator.dart';
+
 class dashboardCard extends StatefulWidget {
   int steps;
   int goal;
@@ -17,109 +17,84 @@ class dashboardCard extends StatefulWidget {
   State<dashboardCard> createState() => _dashboardCardState();
 }
 
-
-
 class _dashboardCardState extends State<dashboardCard> {
+  double getvalue() {
+    double v = widget.steps / widget.goal;
+    return v;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(
-          height: 20,
-        ),
-        Container(
-          padding: EdgeInsets.only(right: 20),
-          child: GestureDetector(
-              onTap: () {
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Goal()),
-
-                );
-
-              },
-              child: Icon(
-                Icons.edit,
-                color: Colors.white,
-                size: 35,
-              )),
-          alignment: Alignment.bottomRight,
-        ),
-        const SizedBox(
-          height: 30,
-        ),
-        SfRadialGauge(axes: <RadialAxis>[
-          RadialAxis(
-            // axisLineStyle: AxisLineStyle(color: Colors.white,),
-              // minimum: double.parse(steps.toString()),
-              // maximum: double.parse(goal.toString()),
-          //
-          // // [NeedlePointer(value:90, )]
-          //
-              pointers:  <GaugePointer> [
-                RangePointer(
-                  value:  59,
-                  color: Colors.red,
-                  width: 25,
-                  enableAnimation: true,
-                ),
-              ],
-
-              ranges: <GaugeRange>[
-                GaugeRange(
-                    startValue:0,
-                    endValue: double.parse(widget.goal.toString()),
-                    color: const Color(0XFFF38064C),
-                    startWidth: 25,
-                    endWidth: 25)
-              ],
-              showLabels: false,
-              showTicks: false,
-
-              annotations: <GaugeAnnotation>[
-                GaugeAnnotation(
-                    widget: Container(
-                        child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Text("Goal :${widget.goal.toString()}",
-                            style: GoogleFonts.aBeeZee(
-                              color: Colors.white,
-                              fontSize: 20,
-                            )),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Text(widget.steps.toString(),
-                            style: GoogleFonts.aBeeZee(
-                              color: Colors.white,
-                              fontSize: 80,
-                            )),
-                      ],
+    return Container(
+      height:  MediaQuery.of(context).size.height*0.45,
+      decoration: BoxDecoration(
+        color: Color(0XFFF38064C),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: EdgeInsets.all(15),
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 5,
+          ),
+          Container(
+              alignment: Alignment.bottomLeft,
+              child: Text(widget.steps.toString(),
+                  style: TextStyle(color: Colors.white, fontSize: 80))),
+          Row(
+            children: [
+              Text(
+                "Goal: ${widget.goal.toString()}",
+                style: TextStyle(color: Colors.white, fontSize: 30),
+              ),
+              SizedBox(
+                width: 20,
+              ),
+              Container(
+                padding: EdgeInsets.only(right: 20),
+                child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Goal()),
+                      );
+                    },
+                    child: Icon(
+                      Icons.edit,
+                      color: Colors.white,
+                      size: 25,
                     )),
-                    angle: 90,
-                    positionFactor: 0.5)
-              ])
-        ]),
-        const SizedBox(
-          height: 50,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            imageContainer(
-                "assets/locations.png", widget.miles.toStringAsFixed(3), "Miles"),
-            imageContainer(
-                "assets/fire.png", widget.calories.toStringAsFixed(3), "Calories"),
-            imageContainer(
-                "assets/time.png", widget.duration.toStringAsFixed(3), "Duration"),
-          ],
-        ),
-      ],
+                alignment: Alignment.bottomRight,
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          Container(
+            child: LinearPercentIndicator(
+              percent: getvalue(),
+              progressColor: Colors.red,
+              lineHeight: 20,
+              animation: true,
+            ),
+          ),
+          const SizedBox(
+            height: 50,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              imageContainer("assets/locations.png",
+                  widget.miles.toStringAsFixed(3), "Miles"),
+              imageContainer("assets/fire.png",
+                  widget.calories.toStringAsFixed(3), "Calories"),
+              imageContainer("assets/time.png",
+                  widget.duration.toStringAsFixed(3), "Duration"),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

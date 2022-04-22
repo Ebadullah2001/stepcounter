@@ -40,6 +40,8 @@ dependencies:
   percent_indicator: ^3.4.0
   google_fonts: ^2.3.1
   syncfusion_flutter_gauges: ^20.1.48
+  footer: ^0.0.4
+  intl:
 
 
 dev_dependencies:

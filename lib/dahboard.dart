@@ -1,8 +1,11 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:kadamcounter/widget/DashBoardCard.dart';
+import 'package:kadamcounter/widget/average.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 class dashboard extends StatefulWidget {
   @override
@@ -18,18 +21,20 @@ class _dashboardState extends State<dashboard> {
   double calories = 0.0;
   double addValue = 0.025;
   int steps = 0;
-  var currDt = DateTime.now();
+  DateTime currDt = DateTime.now();
+  String dateFormat = "";
   int day = 0;
   double previousDistacne = 0.0;
   double distance = 0.0;
   var goal = 100;
+  int ci = 0;
 
   void setSteps() async {
+    dateFormat = DateFormat('EEEE').format(currDt);
     int d = currDt.day;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('steps', steps);
     await prefs.setInt('day', d);
-    print(steps);
   }
 
   Future<int?> gettingSteps() async {
@@ -76,14 +81,14 @@ class _dashboardState extends State<dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      // resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text(
           'Kadam Counter',
           style: TextStyle(
               color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Color(0xff111328),
+        backgroundColor: const Color(0xff111328),
       ),
       body: StreamBuilder<AccelerometerEvent>(
         stream: SensorsPlatform.instance.accelerometerEvents,
@@ -94,21 +99,71 @@ class _dashboardState extends State<dashboard> {
             z = snapShort.data!.z;
             distance = getValue(x, y, z);
             if (distance > 11) {
-              steps++;
-              setSteps();
+              if (goal > steps) {
+                steps++;
+                setSteps();
+              }
             }
             calories = calculateCalories(steps);
             duration = calculateDuration(steps);
             miles = calculateMiles(steps);
           }
-          return Container(
-            color: Color(0xff111328),
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            alignment: Alignment.center,
-            child: dashboardCard(steps, miles, calories, duration, goal),
-          );
+          return Stack(children: [
+            Container(
+              color: const Color(0xff111328),
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              alignment: Alignment.center,
+            ),
+            Container(
+              child: Column(
+                children: [
+                  dashboardCard(steps, miles, calories, duration, goal),
+                  dailyAverage(steps: steps, goal: goal, dateFormat: dateFormat)
+                ],
+              ),
+            )
+          ]);
         },
+      ),
+
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xff111328),
+        selectedItemColor: Colors.white,
+        unselectedItemColor:Colors.brown,
+        currentIndex: ci,
+        onTap: (index) {
+          setState(() {
+            ci = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            backgroundColor: Colors.white,
+            label: "Home",
+            icon: Icon(
+              Icons.home,
+              color: Colors.white,
+              size: 40,
+            ),
+          ),
+          BottomNavigationBarItem(
+            label: "Alert",
+            icon: Icon(
+              Icons.add_alert,
+              color: Colors.white,
+              size: 40,
+            ),
+          ),
+          BottomNavigationBarItem(
+            label: "Profile",
+            icon: Icon(
+              Icons.account_circle,
+              color: Colors.white,
+              size: 40,
+            ),
+          ),
+        ],
       ),
     );
   }
